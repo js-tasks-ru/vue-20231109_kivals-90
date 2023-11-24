@@ -18,6 +18,9 @@ export default defineComponent({
   },
 
   computed: {
+    isoDate() {
+      return new Date(this.date).toISOString().split('T')[0];
+    },
     localizedDate() {
       return new Date(this.date).toLocaleDateString(navigator.language,{
         year: 'numeric',
@@ -39,7 +42,7 @@ export default defineComponent({
       </li>
       <li>
         <img class="icon meetup-info__icon" alt="icon" src="/assets/icons/icon-cal-lg.svg" />
-        <time datetime="2020-01-01">{{ localizedDate }}</time>
+        <time :datetime="isoDate">{{ localizedDate }}</time>
       </li>
     </ul>`,
 });

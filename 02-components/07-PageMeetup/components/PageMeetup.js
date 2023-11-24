@@ -38,7 +38,7 @@ export default defineComponent({
           })
           .catch((error) => {
             this.meetup = null;
-            this.error = error;
+            this.error = error?.message;
           });
       }
     }
