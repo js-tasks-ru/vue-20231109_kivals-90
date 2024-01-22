@@ -1,21 +1,38 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <UiIcon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
+  <div :class="[{'dropdown_opened': isOpened}, 'dropdown']">
+    <button
+      type="button"
+      :class="[{'dropdown__toggle_icon': isIcon}, 'dropdown__toggle']"
+      @click="isOpened = !isOpened"
+    >
+      <UiIcon v-if="selectedType?.icon" :icon="selectedType.icon" class="dropdown__icon" />
+      <span>{{ modelValue ? selectedType?.text : title }}</span>
     </button>
 
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 2
+    <div v-show="isOpened" class="dropdown__menu" role="listbox">
+      <button
+        v-for="{ value, text, icon } in options"
+        :key="value"
+        @click="onSelected(value)"
+        :class="[{'dropdown__item_icon': isIcon}, 'dropdown__item']"
+        role="option"
+        type="button"
+      >
+        <UiIcon v-if="icon" :icon="icon" class="dropdown__icon" />
+        {{ text }}
       </button>
     </div>
   </div>
+
+  <select v-model="localValue" style="display: none">
+    <option
+      v-for="{ value, text } in options"
+      :key="value"
+      :value="value"
+    >
+      {{ text }}
+    </option>
+  </select>
 </template>
 
 <script>
@@ -25,6 +42,56 @@ export default {
   name: 'UiDropdown',
 
   components: { UiIcon },
+
+  props: {
+    options: {
+      type: Array,
+      required: true,
+    },
+    modelValue: {
+      type: String,
+    },
+    title: {
+      type: String,
+      required: true,
+    }
+  },
+
+  emits: ['update:modelValue'],
+
+  data() {
+    return {
+      isOpened: false,
+      localValue: this.modelValue,
+    }
+  },
+
+  computed: {
+    selectedType() {
+      return this.options.find(op => op.value === this.modelValue)
+    },
+
+    isIcon() {
+      return this.options.some(op => op.icon)
+    },
+  },
+
+  methods: {
+    onSelected(value) {
+      this.isOpened = false;
+      this.$emit("update:modelValue", value);
+    }
+  },
+
+  watch: {
+    localValue(newValue) {
+      this.$emit('update:modelValue', newValue);
+    },
+
+    modelValue(newValue) {
+      this.localValue = newValue;
+    },
+  },
 };
 </script>
 
