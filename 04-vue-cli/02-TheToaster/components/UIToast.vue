@@ -20,13 +20,17 @@ export default {
     variant: {
       type: String,
       required: true,
+      validator(value) {
+        return ['success', 'error'].includes(value);
+      }
     },
-    icon: {
-      type: String,
-      required: true,
-    }
   },
   components: { UiIcon },
+  computed: {
+    icon() {
+      return this.variant === "success" ? 'check-circle' : 'alert-circle';
+    }
+  }
 };
 </script>
 

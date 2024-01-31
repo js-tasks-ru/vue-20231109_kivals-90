@@ -1,11 +1,10 @@
 <template>
   <div class="toasts">
     <UIToast
-      v-for="({ message, type }, index) in toasts"
-      :key="index"
+      v-for="{ id, message, type } in toasts"
+      :key="id"
       :message="message"
       :variant="type"
-      :icon="type === $options.TOAST_TYPES.SUCCESS ? 'check-circle' : 'alert-circle'"
     />
   </div>
 </template>
@@ -13,11 +12,6 @@
 <script>
 import UiIcon from './UiIcon.vue';
 import UIToast from "./UIToast.vue";
-
-const TOAST_TYPES = {
-  SUCCESS: 'success',
-  ERROR: 'error',
-};
 
 const DELAY = 5000;
 
@@ -34,22 +28,21 @@ export default {
 
   methods: {
     success(message) {
-      this.createMessage(message, TOAST_TYPES.SUCCESS);
+      this.createMessage(message, "success");
     },
 
     error(message) {
-      this.createMessage(message, TOAST_TYPES.ERROR);
+      this.createMessage(message, "error");
     },
 
     createMessage(message, type) {
-      this.toasts.push({ message, type });
+      const id = Date.now();
+      this.toasts.push({ id, message, type });
       setTimeout(
-        () => this.toasts = this.toasts.filter(m => m.message !== message), DELAY
+        () => this.toasts = this.toasts.filter(m => m.id !== id), DELAY
       );
     }
   },
-
-  TOAST_TYPES,
 };
 </script>
 
