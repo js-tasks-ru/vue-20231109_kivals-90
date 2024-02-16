@@ -6,11 +6,13 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'index',
       alias: '/meetups',
       component: () => import('../views/PageMeetups.vue'),
     },
     {
       path: '/login',
+      name: "login",
       meta: {
         requireGuest: true,
       },
@@ -39,5 +41,14 @@ const router = createRouter({
     },
   ],
 });
+
+router.beforeEach(async (to, from) => {
+  if (!isAuthenticated() && to.meta.requireAuth) {
+    return { name: 'login', query: { from: to.path }};
+  }
+  if (isAuthenticated() && to.meta.requireGuest) {
+    return { name: 'index' };
+  }
+})
 
 export { router };
