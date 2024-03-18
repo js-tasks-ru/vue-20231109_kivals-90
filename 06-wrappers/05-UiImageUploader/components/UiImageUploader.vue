@@ -1,8 +1,22 @@
 <template>
   <div class="image-uploader">
-    <label class="image-uploader__preview image-uploader__preview-loading" style="--bg-url: url('/link.jpeg')">
-      <span class="image-uploader__text">Загрузить изображение</span>
-      <input type="file" accept="image/*" class="image-uploader__input" />
+    <label
+      class="image-uploader__preview"
+      :class="{'image-uploader__preview-loading': loading}"
+      :style="imageSrc"
+    >
+      <span class="image-uploader__text">
+        {{ imageTitle }}
+      </span>
+      <input
+        ref="input"
+        type="file"
+        @change="handleChange"
+        @click="handleClick"
+        v-bind="$attrs"
+        accept="image/*"
+        class="image-uploader__input"
+      />
     </label>
   </div>
 </template>
@@ -10,6 +24,62 @@
 <script>
 export default {
   name: 'UiImageUploader',
+  inheritAttrs: false,
+  props: {
+    uploader: {
+      type: Function,
+    },
+    preview: {
+      type: String,
+    }
+  },
+  emits: ['select', 'remove', 'upload', 'error'],
+  data() {
+    return {
+      image: this.preview,
+      loading: false,
+    }
+  },
+  computed: {
+    imageTitle() {
+      if (this.loading) {
+        return 'Загрузка...';
+      }
+      return this.image ? 'Удалить изображение' : 'Загрузить изображение';
+    },
+    imageSrc() {
+      return this.image ? `--bg-url:url(${this.image})` : null;
+    }
+  },
+  methods: {
+    handleClick(e) {
+      if (this.image || this.loading) {
+        e.preventDefault();
+      }
+      if (this.image && !this.loading) {
+        this.image = null;
+        this.$refs.input.value = '';
+        this.$emit('remove');
+      }
+    },
+    handleChange(e) {
+      this.image = URL.createObjectURL(e.target.files[0]);
+      this.$emit("select", e.target.files[0]);
+      if (this.uploader) {
+        this.loading = true;
+        this.uploader(e.target.files[0])
+          .then(result => {
+            this.$emit("upload", result);
+        }).catch((err) => {
+          this.$emit("error", err);
+          this.$refs.input.value = '';
+          this.image = null;
+        }).finally(() => {
+          this.loading = false;
+        });
+      }
+    }
+  }
 };
 </script>
 
